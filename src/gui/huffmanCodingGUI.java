@@ -17,19 +17,11 @@ public class huffmanCodingGUI implements Runnable {
     private HuffmanCoding huffmanCoding;
     private JFrame frame;
     private JPanel mainPanel;
-    private JButton inputButton;
-    private JTextField inputTextBox;
     private JComboBox charsetComboBox;
-    private JRadioButton decodeRadioButton;
-    private JRadioButton encodeRadioButton;
-    private JButton sourceButton;
-    private JTextField sourceTextBox;
-    private JButton huffmanTreeButton;
+    private JRadioButton decodeRadioButton, encodeRadioButton;
     private JLabel inputLabel;
-    private JButton encodeDecodeButton;
-    private JButton directoryButton;
-    private JTextField directoryTextBox;
-    private JTextField encodeDecodeTextBox;
+    private JButton encodeDecodeButton, directoryButton, huffmanTreeButton, sourceButton, inputButton;
+    private JTextField directoryTextBox, encodeDecodeTextBox, sourceTextBox, inputTextBox;
 
     @Override
     public void run() {
@@ -48,29 +40,19 @@ public class huffmanCodingGUI implements Runnable {
         huffmanTreeButton.addActionListener(new HuffmanTreeButtonActionListener());
         directoryButton.addActionListener(new DirectoryButtonActionListener());
         encodeDecodeButton.addActionListener(new EncodeDecodeButtonActionListener());
-        decodeRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                encodeDecodeButton.setText("Decode");
-                inputLabel.setText("File to Decode Path");
-                clearSelection();
-            }
+        decodeRadioButton.addActionListener(actionEvent -> {
+            encodeDecodeButton.setText("Decode");
+            inputLabel.setText("File to Decode Path");
+            clearSelection();
         });
-        encodeRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                encodeDecodeButton.setText("Encode");
-                inputLabel.setText("File to Encode Path");
-                clearSelection();
-            }
+        encodeRadioButton.addActionListener(actionEvent -> {
+            encodeDecodeButton.setText("Encode");
+            inputLabel.setText("File to Encode Path");
+            clearSelection();
         });
-        charsetComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
-                if(!inputTextBox.getText().equalsIgnoreCase(""))
-                    huffmanCoding = new HuffmanCoding(inputTextBox.getText(), charsetComboBox.getSelectedItem().toString());
-            }
+        charsetComboBox.addActionListener(actionEvent -> {
+            if(!inputTextBox.getText().equalsIgnoreCase(""))
+                huffmanCoding = new HuffmanCoding(inputTextBox.getText(), charsetComboBox.getSelectedItem().toString());
         });
         contentPane.add(mainPanel);
     }
