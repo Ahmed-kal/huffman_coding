@@ -25,14 +25,26 @@ public class HuffmanCoding {
         buildMap();
     }
 
+    public HuffmanCoding(String fileName, String charset) {
+        this.charset = Charset.forName(charset);
+        root = buildHuffmanTree(readFile(fileName));
+        buildMap();
+    }
+
     public HuffmanCoding(TreeNode root){
         this.charset = Charset.defaultCharset();
         this.root = root;
+        buildMap();
+    }
 
+    public HuffmanCoding(TreeNode root, String charset) {
+        this.charset = Charset.forName(charset);
+        this.root = root;
+        buildMap();
     }
 
     //returns the available character sets on the operating system.
-    public Set<String> getAvailableCharset() {
+    public Set<String> getAvailableCharsets() {
         return Charset.availableCharsets().keySet();
     }
 
@@ -47,7 +59,7 @@ public class HuffmanCoding {
         }
     }
 
-    //sets the character set if it's a valid character set.
+    //sets the character set if it's a valid character set. returns whether the operation was successful.
     public boolean setCharset(String charsetName) {
         Charset charset = Charset.availableCharsets().get(charsetName);
         if(charset != null) {
@@ -105,7 +117,7 @@ public class HuffmanCoding {
         return (TreeNode) heap.pop();
     }
 
-    //creates a PNG graph of the huffman tree.
+    //creates a PNG graph of the huffman tree and saves it the given path.
     public File createTreeGraph(String fileName) {
         return GraphCreator.Create(root, fileName);
     }
@@ -121,7 +133,8 @@ public class HuffmanCoding {
         return true;
     }
 
-
+    //Given a path to a text file and a path to store the new file. Encodes the file based on the huffman map.
+    //Returns -1 if the operation is unsuccessful otherwise returns the size of the decoded file.
     public int encodeFile(String fileName, String newFileName) {
         List<Character> chars = readFile(fileName);
         byte[] encodedFile = new byte[chars.size()*10];
@@ -129,12 +142,15 @@ public class HuffmanCoding {
         byte padding = 0;
         StringBuilder encodedBinary = new StringBuilder();
         for(int i = 0 ; i < chars.size() ; i++) {
+            //adds characters into the encoded buffer as their binary code.
             encodedBinary.append(codeWords.get(chars.get(i)));
+            //if the binary code buffer reaches a byte add it to the encoded file byte array.
             while(encodedBinary.length() >= 8) {
                 encodedFile[size++] = (byte) Short.parseShort( encodedBinary.substring(0, 8), 2);
                 encodedBinary.delete(0, 8);
             }
         }
+        //if the last binary code does not fit into a byte. adds padding and the size of the padding.
         if(encodedBinary.length() > 0) {
             while (encodedBinary.length() < 8) {
                 encodedBinary.insert(0,'0');
@@ -143,12 +159,14 @@ public class HuffmanCoding {
             encodedFile[size++] = (byte) Short.parseShort( encodedBinary.substring(0, 8), 2);
         }
         encodedFile[size++] = padding;
+        //writes the encoded file to the given path.
         if(write(newFileName, encodedFile, size))
             return size;
         else
             return -1;
     }
 
+    //Writes the character list to the given fileName.
     private boolean writeFile(ArrayList<Character> chars, String fileName) {
         try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(fileName)), charset))) {
             for(int i = 0 ; i < chars.size() ; i++) {
@@ -161,7 +179,8 @@ public class HuffmanCoding {
         return true;
     }
 
-
+    //Given a path to an encoded file and a path to store the new file. Decodes the file based on the huffman tree.
+    //Returns -1 if the operation is unsuccessful otherwise returns the compression rate.
     public double decodeFile(String fileName, String newFileName) {
         byte[] encodedData = read(fileName);
         ArrayList<Character> decodedData = new ArrayList<>();

@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Set;
 
-public class huffmanGUI implements Runnable {
+public class huffmanCodingGUI implements Runnable {
 
     private HuffmanCoding huffmanCoding;
     private JFrame frame;
@@ -34,7 +34,7 @@ public class huffmanGUI implements Runnable {
     @Override
     public void run() {
         frame = new JFrame("Huffman Coding");
-        frame.setPreferredSize(new Dimension(420, 450));
+        frame.setPreferredSize(new Dimension(420, 550));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         createComponents(frame.getContentPane());
         frame.pack();
@@ -53,12 +53,7 @@ public class huffmanGUI implements Runnable {
             public void actionPerformed(ActionEvent actionEvent) {
                 encodeDecodeButton.setText("Decode");
                 inputLabel.setText("File to Decode Path");
-                inputTextBox.setText("");
-                directoryTextBox.setText("");
-                encodeDecodeTextBox.setText("");
-                encodeDecodeButton.setEnabled(false);
-                directoryButton.setEnabled(false);
-
+                clearSelection();
             }
         });
         encodeRadioButton.addActionListener(new ActionListener() {
@@ -66,20 +61,26 @@ public class huffmanGUI implements Runnable {
             public void actionPerformed(ActionEvent actionEvent) {
                 encodeDecodeButton.setText("Encode");
                 inputLabel.setText("File to Encode Path");
-                inputTextBox.setText("");
-                directoryTextBox.setText("");
-                encodeDecodeTextBox.setText("");
-                encodeDecodeButton.setEnabled(false);
-                directoryButton.setEnabled(false);
+                clearSelection();
             }
         });
         charsetComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                huffmanCoding.setCharset(charsetComboBox.getSelectedItem().toString());
+
+                if(!inputTextBox.getText().equalsIgnoreCase(""))
+                    huffmanCoding = new HuffmanCoding(inputTextBox.getText(), charsetComboBox.getSelectedItem().toString());
             }
         });
         contentPane.add(mainPanel);
+    }
+
+    private void clearSelection() {
+        inputTextBox.setText("");
+        directoryTextBox.setText("");
+        encodeDecodeTextBox.setText("");
+        encodeDecodeButton.setEnabled(false);
+        directoryButton.setEnabled(false);
     }
 
     private class SourceButtonActionListener implements ActionListener{
@@ -95,7 +96,7 @@ public class huffmanGUI implements Runnable {
                 sourceTextBox.setText(file.getPath());
                 huffmanCoding = new HuffmanCoding(file.getPath());
                 huffmanTreeButton.setEnabled(true);
-                Set<String> charsets = huffmanCoding.getAvailableCharset();
+                Set<String> charsets = huffmanCoding.getAvailableCharsets();
                 for (String charset : charsets)
                     charsetComboBox.addItem(charset);
                 charsetComboBox.setSelectedItem(Charset.defaultCharset().toString());
@@ -110,7 +111,8 @@ public class huffmanGUI implements Runnable {
     private class HuffmanTreeButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            File graph = new File("output/" + sourceTextBox.getText() + "_HuffmanTreeGraph.png");
+            String fileName = sourceTextBox.getText();
+            File graph = new File(fileName.substring(0, fileName.length()-4) + "_HuffmanTreeGraph.png");
             if(!Files.exists(graph.toPath())) {
                 graph = huffmanCoding.createTreeGraph(sourceTextBox.getText());
             }
@@ -132,16 +134,16 @@ public class huffmanGUI implements Runnable {
             fileChooser.setAcceptAllFileFilterUsed(false);
             int returnVal = fileChooser.showOpenDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                String path = fileChooser.getSelectedFile().getPath();
+                File file = fileChooser.getSelectedFile();
+                String fileName = file.getName().substring(0, file.getName().lastIndexOf(".") + 1);
+                String path = file.getPath();
                 inputTextBox.setText(path);
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder(path.substring(0, path.length() - (fileName.length() + 3)));
                 if(encodeRadioButton.isSelected()) {
-                    sb.append(path, 0, path.length()-3);
-                    sb.insert(sb.lastIndexOf("/") + 1, "ENCODED_");
+                    sb.append("ENCODED_" + fileName);
                     sb.append("hetf");
                 } else {
-                    sb.append(path, 0, path.length()-4);
-                    sb.insert(sb.lastIndexOf("/") + 1, "DECODED_");
+                    sb.append("DECODED_" + fileName);
                     sb.append("txt");
                 }
                 directoryTextBox.setText(sb.toString());

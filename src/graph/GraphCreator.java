@@ -21,7 +21,8 @@ public class GraphCreator {
     public static File Create(TreeNode root, String fileName) {
         MutableGraph mutableGraph = mutGraph("Huffman Tree").setDirected(true).add(createNode(root));
         try {
-            File createdGraph = new File("output/" + fileName + "_HuffmanTreeGraph.png");
+            fileName = fileName.substring(0, fileName.length()-4);
+            File createdGraph = new File(fileName + "_HuffmanTreeGraph.png");
             Graphviz.fromGraph(mutableGraph).render(Format.PNG).toFile(createdGraph);
             return createdGraph;
         } catch (IOException e) {
